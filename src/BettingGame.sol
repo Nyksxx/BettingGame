@@ -54,6 +54,10 @@ contract BettingGame is VRFConsumerBaseV2 {
 
     event ReturnedRandomness(uint256[] randomWords);
 
+    error youNeedToStartBet();
+
+    bool x;
+
     /**
      * @notice Constructor inherits VRFConsumerBaseV2
      *
@@ -89,7 +93,7 @@ contract BettingGame is VRFConsumerBaseV2 {
      * @notice Requests randomness
      * Assumes the subscription is funded sufficiently; "Words" refers to unit of data in Computer Science
      */
-    function requestRandomWords() external onlyOwner {
+    function startBet() public {
         // Will revert if subscription is not set and funded.
         s_requestId = COORDINATOR.requestRandomWords(
             s_keyHash,
@@ -98,6 +102,7 @@ contract BettingGame is VRFConsumerBaseV2 {
             s_callbackGasLimit,
             s_numWords
         );
+        x = true;
     }
 
     /**
@@ -120,14 +125,18 @@ contract BettingGame is VRFConsumerBaseV2 {
     }
 
     function bet(uint256 _ethAmount) public {
-        require(balances[msg.sender] >= _ethAmount);
-        uint256 lastIndex = s_randomWords.length - 1;
-        uint256 beforeLast = s_randomWords.length - 2;
-        balances[msg.sender] -= _ethAmount;
-        uint256 randomNumber = s_randomWords[lastIndex] % 2;
-        if (randomNumber == 0) {
-            balances[msg.sender] += (_ethAmount * 2);
-        } else {}
+        if (x) {
+            require(balances[msg.sender] >= _ethAmount);
+            uint256 lastIndex = s_randomWords.length - 1;
+            uint256 beforeLast = s_randomWords.length - 2;
+            balances[msg.sender] -= _ethAmount;
+            uint256 randomNumber = s_randomWords[lastIndex] % 2;
+            if (randomNumber == 0) {
+                balances[msg.sender] += (_ethAmount * 2);
+            } else {}
+        } else {
+            revert youNeedToStartBet();
+        }
     }
 
     // getter functions //

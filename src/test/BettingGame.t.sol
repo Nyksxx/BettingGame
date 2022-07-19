@@ -36,12 +36,12 @@ contract BettingGameTest is Test {
 
     function testCanRequestRandomness() public {
         uint256 startingRequestId = _bettingGame.s_requestId();
-        _bettingGame.requestRandomWords();
+        _bettingGame.startBet();
         assertTrue(_bettingGame.s_requestId() != startingRequestId);
     }
 
     function testCanGetRandomResponse() public {
-        _bettingGame.requestRandomWords();
+        _bettingGame.startBet();
         uint256 requestId = _bettingGame.s_requestId();
 
         uint256[] memory words = getWords(requestId);
@@ -69,7 +69,7 @@ contract BettingGameTest is Test {
     }
 
     function testBet() public {
-        _bettingGame.requestRandomWords();
+        _bettingGame.startBet();
         uint256 requestId = _bettingGame.s_requestId();
 
         vrfCoordinator.fulfillRandomWords(requestId, address(_bettingGame));
